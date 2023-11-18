@@ -6,7 +6,9 @@ authors = ["jglowacz, akolba"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.8,<4.0"
+supabase = "^2.0.3"
+python-dotenv = "^1.0.0"
 
 
 [build-system]
