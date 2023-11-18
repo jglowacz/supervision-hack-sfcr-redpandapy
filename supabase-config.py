@@ -24,15 +24,5 @@ table_name_weyfik_komplet = "Weryfikacja kompletnosci SFCR template"
 # get_data_weyfik_komplet = supabase.table(table_name_weyfik_komplet).select("*").execute() # Getting data from table "Weryfikacja kompletnosci SFCR template"
 # print(get_data_weyfik_komplet) # Printing data from table "Weryfikacja kompletnosci SFCR template"
 
-#insert_data_dane_jakosc = supabase.table(table_name_dane_jakosc).insert({"ID_TAB":"2"}).execute()
-
-# Fetch all data from the table
-data = supabase.table(table_name_dane_jakosc).select().execute()
-
-# Print the column names
-print(data['columns'])
-
-
-
-
+# insert_data_dane_jakosc = supabase.table(table_name_dane_jakosc).insert({"ID_TAB":"2"}).execute()
 
