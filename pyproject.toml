@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "supervision-hack-sfcr-redpandapy"
+version = "0.1.0"
+description = "Project for Supervision_hack 3"
+authors = ["jglowacz, akolba"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+supabase = "^2.0.3"
+python-dotenv = "^1.0.0"
+pymupdf = "^1.23.6"
+pandas = "^2.1.3"
+numpy = "^1.26.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
