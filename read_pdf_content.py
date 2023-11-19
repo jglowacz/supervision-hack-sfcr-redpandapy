@@ -2,11 +2,30 @@ import numpy as np
 import pathlib, fitz
 import pandas as pd
 import re
+import os
 
-fname = "allianztuir.pdf"  # get document filename - czyli ścieżka gdzie jest plik
+PDFS_DIR = "pdfs"
 
-# Open the PDF file
-doc = fitz.open(fname)
+# Get the list of PDF files in the "pdfs" directory
+pdf_files = [file for file in os.listdir(PDFS_DIR) if file.endswith(".pdf")]
+
+# Initialize a list to store the opened PDF documents
+
+
+def process_pdf_files(pdf_files, pdfs_dir):
+    docs = []
+    # Loop over each PDF file and open it
+    for fname in pdf_files:
+        # Open the PDF file
+        doc = fitz.open(os.path.join(pdfs_dir, fname))
+        # Append the opened document to the list of docs
+        docs.append(doc)
+        # Add your code to process the PDF file here
+        # ...
+    return docs
+
+# Call the function with the necessary arguments
+all_pdfs = process_pdf_files(pdf_files, PDFS_DIR)
 
 # Initialize variables for extracting the content of each section for "dane jakościowe" table
 
@@ -17,29 +36,39 @@ save = False # initialize variable to store whether to save the current line
 # Define the section names by assigning only prefixes of the section names
 section_name_prefix = ['A.', 'B.', 'C.', 'D.', 'E.', 'Podsumowanie', 'Załączniki']
 
-# Iterate over the pages of the PDF file
-for page_num in range(doc.page_count): 
-    page = doc[page_num] # get the page
+def process_pdf_content(doc):
+    sections_content_data = {} # initialize dictionary to store the content of each section
+    current_section_name = None # initialize variable to store the name of the current section
+    save = False # initialize variable to store whether to save the current line
+
+    # Iterate over the pages of the PDF file
+    for page_num in range(doc.page_count): 
+        page = doc[page_num] # get the page
+
+        text = page.get_text() # get the text of the page
+
+        for line in text.split('\n'):  # Split the text into lines
+            line = line.strip() # Remove leading/trailing white spaces
+
+            # Check if the line start with the section name prefix
+            if any(line.startswith(prefix) for prefix in section_name_prefix):
+                # If the line is a section name, start a new section
+                current_section_name = line # Set the current section name
+                sections_content_data[current_section_name] = '' # Initialize the content of the current section
+                save = True 
+            elif save and line:
+                # If the line is not a section name and a section has started, add it to the current section
+                sections_content_data[current_section_name] += line + '\n' # Add the line to the current section
+            else:
+                save = False
     
-    text = page.get_text() # get the text of the page
+    return sections_content_data
 
-    for line in text.split('\n'):  # Split the text into lines
-        line = line.strip() # Remove leading/trailing white spaces
-
-        # Check if the line start with the section name prefix
-        if any(line.startswith(prefix) for prefix in section_name_prefix):
-            # If the line is a section name, start a new section
-            current_section_name = line # Set the current section name
-            sections_content_data[current_section_name] = '' # Initialize the content of the current section
-            save = True 
-        elif save and line:
-            # If the line is not a section name and a section has started, add it to the current section
-            sections_content_data[current_section_name] += line + '\n' # Add the line to the current section
-        else:
-            save = False
+# Call the function for each document in all_pdfs
+all_sections_content_data = [process_pdf_content(doc) for doc in all_pdfs]
 
 # Convert the section_dane_jakosc dictionary to a first DataFrame
-df_from_sfcr = pd.DataFrame(list(sections_content_data.items()), columns=['section_name', 'contents'])
+df_from_sfcr = pd.DataFrame(all_sections_content_data, columns=['section_name', 'contents'])
 
 # Create second DataFrame with id_tab, sfcr_version, id_parent_section & section name
 data_df_ids_and_section = [
@@ -84,6 +113,10 @@ data_df_ids_and_section = [
 
 # Create second DataFrame from list of dictionaries
 df_ids_and_section = pd.DataFrame(data_df_ids_and_section)
+
+# Convert 'section_name' to string
+df_from_sfcr['section_name'] = df_from_sfcr['section_name'].astype(str)
+df_ids_and_section['section_name'] = df_ids_and_section['section_name'].astype(str)
 
 # Perform an outer join to keep all rows from both DataFrames
 merged_two_dfs = pd.merge(df_ids_and_section, df_from_sfcr, on='section_name', how='outer')

@@ -1,6 +1,5 @@
 scraperesult.txt
 poetry.lock
-pdfs
 scrapedpdfs.txt
 .env
 aegon_output.csv
